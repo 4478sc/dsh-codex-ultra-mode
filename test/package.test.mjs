@@ -26,9 +26,19 @@ test("manifest and bundle patch agree on the plugin name", async () => {
   }
 });
 
-test("README states the independent compatibility boundary", async () => {
-  const readme = await readFile(resolve(root, "README.md"), "utf8");
-  assert.match(readme, /不包含 OpenAI 私有代码/u);
-  assert.match(readme, /已知差异/u);
-  assert.match(readme, /single-writer/u);
+test("English and Chinese READMEs state the compatibility boundary and link to each other", async () => {
+  const [readme, chineseReadme] = await Promise.all([
+    readFile(resolve(root, "README.md"), "utf8"),
+    readFile(resolve(root, "README.zh-CN.md"), "utf8"),
+  ]);
+
+  assert.match(readme, /<a href="\.\/README\.zh-CN\.md">简体中文<\/a>/u);
+  assert.match(readme, /contains no OpenAI private code/iu);
+  assert.match(readme, /Known differences from Codex Ultra/u);
+  assert.match(readme, /single-writer/iu);
+
+  assert.match(chineseReadme, /<a href="\.\/README\.md">English<\/a>/u);
+  assert.match(chineseReadme, /不包含 OpenAI 私有代码/u);
+  assert.match(chineseReadme, /已知差异/u);
+  assert.match(chineseReadme, /single-writer/u);
 });
