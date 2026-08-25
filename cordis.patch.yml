@@ -1,0 +1,17 @@
+# dsh-codex-ultra-mode — host-only orchestration policy and collaboration tools.
+# The standard DSH base preset already supplies subagent providers and the
+# send_message / interrupt_agent / list_agents / report tools used here.
+- insert:
+    - id: codex-ultra-mode
+      name: dsh-codex-ultra-mode
+      config:
+        maxConcurrentSubagents: 3
+        maxDepth: 3
+        maxTotalSubagents: 12
+        maxWaitMs: 30000
+        maxBarrierSteps: 8
+        barrierDrainMs: 10000
+        singleWriter: true
+        childDenyTools: []
+        allowWorkflow: false
+        slashCommand: true
