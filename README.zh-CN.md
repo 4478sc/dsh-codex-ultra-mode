@@ -44,13 +44,13 @@ Agent Team 适合长期命名成员、任务板、DAG 和成员互聊；Ultra �
 要求 DeepSeek Harness `0.2.0-rc.1` 或更新的 0.2.x。安装 npm 发布包：
 
 ```bash
-dsh plugin --profile web add dsh-codex-ultra-mode@0.2.0
+dsh plugin --profile web add dsh-codex-ultra-mode@0.3.0
 ```
 
 如果 `dsh` 不在 `PATH`：
 
 ```bash
-npx @deepseek-ai/dsh@0.2.1-rc.3 plugin --profile web add dsh-codex-ultra-mode@0.2.0
+npx @deepseek-ai/dsh@0.2.1-rc.3 plugin --profile web add dsh-codex-ultra-mode@0.3.0
 ```
 
 验证配置并重启 DSH Web：
@@ -95,6 +95,9 @@ dsh plugin --profile web add link:"$PWD"
   config:
     spawnProvider: spawn
     forkProvider: fork
+    childProvider: ""
+    childModel: ""
+    childMaxTokens: 0
     maxConcurrentSubagents: 3
     maxDepth: 3
     maxTotalSubagents: 12
@@ -107,6 +110,15 @@ dsh plugin --profile web add link:"$PWD"
     allowWorkflow: false
     slashCommand: true
 ```
+
+子 Agent 默认继承父 Agent 的 provider/model。把 `childProvider` 与 `childModel` 一起设置，即可统一指定子 Agent 的默认模型路由；`childMaxTokens: 0` 表示沿用子模型自己的输出上限。例如，让所有 Ultra 子 Agent 都跑在 ChatGPT 的 `gpt-6-luna` 上：
+
+```yaml
+childProvider: codex
+childModel: gpt-6-luna
+```
+
+这一对必须同时配置；只设置其中一个会在插件启动时报出明确错误。这是修改默认值的唯一入口——`spawn_agent` 不提供单次调用的模型覆盖。
 
 `allowWorkflow=false` 是有意的默认值：DSH workflow 是固定脚本前台扇出，默认并发取决于 CPU，语义上不同于 Ultra 的逐轮模型决策。若确实需要数十到上千个同构任务，可打开它或在非 Ultra 会话使用 workflow。
 

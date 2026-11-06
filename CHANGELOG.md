@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.0 — 2026-11-06
+
+- Add `childProvider`, `childModel`, and `childMaxTokens` so every Ultra subagent can run on a pinned default route (for example `codex` + `gpt-6-luna`) instead of inheriting the parent's model. The provider/model pair must be configured together; `childMaxTokens: 0` keeps the child model's own limit.
+
 ## 0.2.0 — 2026-11-06
 
 - Target DeepSeek Harness 0.2.x (peer range `^0.2.0-rc.1`); `0.2.0-rc.1` and newer are supported. 0.1.x remains the DSH `0.1.1-rc.2` line.
@@ -7,7 +11,7 @@
 - Port `spawn_agent` to `subagents.startActivation({ delivery: "parent" })`, with a runtime fallback to `subagents.startContinuable` on `0.2.0-rc.1`, `0.2.0-rc.2`, and `0.2.1-alpha.1`, which predate `startActivation`.
 - Port `followup_task` from `subagents.followup` to `subagents.sendMessage` (delivered at the child's next step boundary).
 - Port completion-barrier and unload drain from `subagents.drainContinuableChildren` to `subagents.drainChildren`.
-- Drop the per-start `toolFilter`: DSH 0.2.x moved child tool composition to Agent Presets. Single-writer remains enforced at call time by the plugin's `tools.guard`, which denies mutating tools below depth 0.
+- Drop the per-start `toolFilter`: DSH 0.2.x moved child tool composition to Agent Presets. Single-writer remains enforced at call time by the plugin's `tools.guard`, which denies mutating tools at depth > 0.
 
 ## 0.1.0 — 2026-08-25
 

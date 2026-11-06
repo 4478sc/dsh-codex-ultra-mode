@@ -42,6 +42,19 @@ test("policy renders resolved limits and single-writer contract", () => {
   assert.match(text, /wait_agent/u);
 });
 
+test("default child model route is resolved and must be a complete pair", () => {
+  const config = resolveConfig({ childProvider: "codex", childModel: "gpt-6-luna" });
+  assert.equal(config.childProvider, "codex");
+  assert.equal(config.childModel, "gpt-6-luna");
+  assert.equal(config.childMaxTokens, 0);
+  const text = buildUltraPolicy({ depth: 0, path: "/root", parentPath: null }, config);
+  assert.match(text, /codex\/gpt-6-luna/u);
+  assert.throws(() => resolveConfig({ childProvider: "codex" }), /childProvider and childModel/u);
+  assert.throws(() => resolveConfig({ childModel: "gpt-6-luna" }), /childProvider and childModel/u);
+  const inherited = buildUltraPolicy({ depth: 0, path: "/root", parentPath: null }, resolveConfig());
+  assert.match(inherited, /inherit the parent model route/u);
+});
+
 test("plugin notices carry a producer-owned source kind", () => {
   // DSH 0.2.x refuses the retired V3 { kind: "plugin", plugin: ... } wrapper
   // at session admission with "format v4 message requires a producer-owned

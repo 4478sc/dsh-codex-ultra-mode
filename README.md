@@ -44,13 +44,13 @@ The remaining capabilities come directly from DSH:
 DeepSeek Harness `0.2.0-rc.1` or newer (0.2.x) is required. Install from npm:
 
 ```bash
-dsh plugin --profile web add dsh-codex-ultra-mode@0.2.0
+dsh plugin --profile web add dsh-codex-ultra-mode@0.3.0
 ```
 
 If `dsh` is not on `PATH`:
 
 ```bash
-npx @deepseek-ai/dsh@0.2.1-rc.3 plugin --profile web add dsh-codex-ultra-mode@0.2.0
+npx @deepseek-ai/dsh@0.2.1-rc.3 plugin --profile web add dsh-codex-ultra-mode@0.3.0
 ```
 
 Validate the composed profile and restart DSH Web:
@@ -95,6 +95,9 @@ They can be installed in the same profile, but currently should be used in separ
   config:
     spawnProvider: spawn
     forkProvider: fork
+    childProvider: ""
+    childModel: ""
+    childMaxTokens: 0
     maxConcurrentSubagents: 3
     maxDepth: 3
     maxTotalSubagents: 12
@@ -107,6 +110,15 @@ They can be installed in the same profile, but currently should be used in separ
     allowWorkflow: false
     slashCommand: true
 ```
+
+Subagents inherit the parent's provider/model route by default. Set `childProvider` and `childModel` together to pin a default child route; `childMaxTokens: 0` keeps the child model's own output limit. For example, to run every Ultra subagent on ChatGPT's `gpt-6-luna`:
+
+```yaml
+childProvider: codex
+childModel: gpt-6-luna
+```
+
+The pair must be configured together; setting only one fails plugin startup with a clear error. This is the single place to change the default — `spawn_agent` has no per-call model override.
 
 `allowWorkflow=false` is intentional. DSH workflows are fixed, scripted foreground fan-outs whose default concurrency depends on CPU count; their semantics differ from Ultra's turn-by-turn model decisions. Enable it only when you truly need tens to thousands of homogeneous jobs, or run the workflow in a non-Ultra session.
 

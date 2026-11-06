@@ -83,6 +83,53 @@ test("spawn falls back to the 0.2.0 startContinuable API", async () => {
   assert.equal(value.status, "running");
 });
 
+test("spawn pins the configured default child model", async () => {
+  const { config, registry } = setup({ childProvider: "codex", childModel: "gpt-6-luna" });
+  let captured;
+  const ctx = {
+    subagents: {
+      async startActivation(spec) {
+        captured = spec;
+        return { childId: spec.childId, messageId: "model-message" };
+      }
+    }
+  };
+  const tool = createSpawnAgentTool(ctx, registry, config);
+  await tool.execute(
+    { task_name: "child_model", message: "Run on the pinned route." },
+    { agent: parent, signal: new AbortController().signal }
+  );
+  assert.equal(captured.request.agentOptions.provider, "codex");
+  assert.equal(captured.request.agentOptions.model, "gpt-6-luna");
+  assert.equal(captured.request.agentOptions.maxTokens, undefined);
+  assert.equal(Object.hasOwn(captured.request.agentOptions, "maxTokens"), true);
+});
+
+test("spawn inherits the parent route when no child model is configured", async () => {
+  const { config, registry } = setup();
+  const parentWithRoute = {
+    ...parent,
+    options: { provider: "opencode-go", model: "deepseek-v4.1-flash", maxTokens: 384000 }
+  };
+  let captured;
+  const ctx = {
+    subagents: {
+      async startActivation(spec) {
+        captured = spec;
+        return { childId: spec.childId, messageId: "inherit-message" };
+      }
+    }
+  };
+  const tool = createSpawnAgentTool(ctx, registry, config);
+  await tool.execute(
+    { task_name: "inherit", message: "Run on the parent route." },
+    { agent: parentWithRoute, signal: new AbortController().signal }
+  );
+  assert.equal(captured.request.agentOptions.provider, "opencode-go");
+  assert.equal(captured.request.agentOptions.model, "deepseek-v4.1-flash");
+  assert.equal(captured.request.agentOptions.maxTokens, 384000);
+});
+
 test("local tool definitions reject malformed model arguments before execution", async () => {
   const { config, registry } = setup();
   const spawn = createSpawnAgentTool({
